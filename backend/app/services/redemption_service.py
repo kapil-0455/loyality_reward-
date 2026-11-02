@@ -19,7 +19,6 @@ from backend.app.db.models import (
 def redeem_reward(db: Session, request):
 
     try:
-        # 1. Generate request hash
         request_data = {
             "approval_id": request.approval_id,
             "customer_id": request.customer_id,
@@ -31,7 +30,7 @@ def redeem_reward(db: Session, request):
             json.dumps(request_data, sort_keys=True).encode()
         ).hexdigest()
 
-        # 2. Check duplicate redemption
+        # 1. First idempotency check
         existing = (
             db.query(RewardLedger)
             .filter(
@@ -48,7 +47,7 @@ def redeem_reward(db: Session, request):
 
             return existing
 
-        # 3. Lock and fetch approval
+        # 2. Lock approval
         approval = (
             db.query(RewardApproval)
             .filter(
@@ -60,6 +59,25 @@ def redeem_reward(db: Session, request):
 
         if approval is None:
             raise ValueError("Approval not found")
+
+        # 3. IMPORTANT: Check ledger again after acquiring lock
+        # Another concurrent request may have completed redemption.
+        existing = (
+            db.query(RewardLedger)
+            .filter(
+                RewardLedger.idempotency_key == request.idempotency_key
+            )
+            .first()
+        )
+
+        if existing:
+            if existing.request_hash != request_hash:
+                raise ValueError(
+                    "Idempotency key already used with different request"
+                )
+
+            db.commit()
+            return existing
 
         if approval.approval_status != "APPROVED":
             raise ValueError("Approval is not available for redemption")
@@ -104,7 +122,7 @@ def redeem_reward(db: Session, request):
         if campaign.approved_amount < approval.reward_cost:
             raise ValueError("Approved campaign amount is insufficient")
 
-        # 7. Fetch inventory mappings
+        # 7. Fetch and lock inventory
         mappings = (
             db.query(RewardProductMapping)
             .filter(
@@ -145,14 +163,14 @@ def redeem_reward(db: Session, request):
 
             inventory_rows.append((inventory, quantity))
 
-        # 8. Debit customer points
+        # 8. Debit points
         customer.points_balance -= approval.points_required
 
         # 9. Transfer campaign budget
         campaign.approved_amount -= approval.reward_cost
         campaign.committed_amount += approval.reward_cost
 
-        # 10. Convert reserved stock into fulfilled stock
+        # 10. Update inventory
         for inventory, quantity in inventory_rows:
 
             inventory.on_hand_stock -= quantity
@@ -162,7 +180,7 @@ def redeem_reward(db: Session, request):
                 inventory.on_hand_stock - inventory.reserved_stock
             )
 
-        # 11. Create redemption ledger
+        # 11. Create ledger entry
         redemption = RewardLedger(
             redemption_id=str(uuid4()),
             approval_id=approval.approval_id,
@@ -180,10 +198,10 @@ def redeem_reward(db: Session, request):
 
         db.add(redemption)
 
-        # 12. Update approval status
+        # 12. Update approval
         approval.approval_status = "REDEEMED"
 
-        # 13. Commit everything atomically
+        # 13. Commit all changes atomically
         db.commit()
         db.refresh(redemption)
 
