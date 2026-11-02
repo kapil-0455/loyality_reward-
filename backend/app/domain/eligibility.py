@@ -1,4 +1,3 @@
-
 from datetime import date, datetime
 
 
@@ -55,13 +54,14 @@ def check_eligibility(
     if customer["points_balance"] < reward["points_required"]:
         reason_codes.append("INSUFFICIENT_POINTS")
 
-    # 6. Check minimum purchase requirement
+    # 6. Check minimum purchase requirement.
+    # Some rewards have no minimum purchase requirement (NULL in PostgreSQL).
     minimum_purchase = reward["minimum_purchase_value"]
 
-    if purchase_value < minimum_purchase:
+    if minimum_purchase is not None and purchase_value < minimum_purchase:
         reason_codes.append("MINIMUM_PURCHASE_NOT_MET")
 
     return {
         "eligible": len(reason_codes) == 0,
         "reason_codes": reason_codes
-   }
+    }
