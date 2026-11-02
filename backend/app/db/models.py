@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     Boolean,
@@ -16,6 +16,10 @@ from sqlalchemy import (
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
+
+
+def utc_now():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class CustomerLoyaltyProfile(Base):
@@ -127,7 +131,7 @@ class RewardApproval(Base):
     points_required = Column(Integer, nullable=False)
     reward_cost = Column(Numeric, nullable=False)
     approval_status = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=utc_now)
 
 
 class RewardLedger(Base):
