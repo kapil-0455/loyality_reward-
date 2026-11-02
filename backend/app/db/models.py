@@ -1,3 +1,4 @@
+from datetime import datetime
 
 from sqlalchemy import (
     Boolean,
@@ -91,10 +92,50 @@ class RewardProductMapping(Base):
     is_synthetic = Column(Boolean, nullable=False)
 
 
+class RewardApproval(Base):
+    __tablename__ = "reward_approvals"
+    __table_args__ = (
+        UniqueConstraint("idempotency_key", name="uq_reward_approvals_idempotency_key"),
+    )
+
+    approval_id = Column(String, primary_key=True)
+    idempotency_key = Column(String, nullable=False)
+    request_hash = Column(String, nullable=False)
+    customer_id = Column(
+        Numeric(12, 0),
+        ForeignKey("customer_loyalty_profiles.customer_id"),
+        nullable=False
+    )
+    reward_id = Column(
+        String,
+        ForeignKey("reward_catalogue.reward_id"),
+        nullable=False
+    )
+    campaign_id = Column(
+        String,
+        ForeignKey("campaign_budgets.campaign_id"),
+        nullable=False
+    )
+    purchase_value = Column(Numeric, nullable=False)
+    evaluation_date = Column(Date, nullable=False)
+    points_required = Column(Integer, nullable=False)
+    reward_cost = Column(Numeric, nullable=False)
+    approval_status = Column(String, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
 class RewardLedger(Base):
     __tablename__ = "reward_ledger"
+    __table_args__ = (
+        UniqueConstraint("idempotency_key", name="uq_reward_ledger_idempotency_key"),
+    )
 
     redemption_id = Column(String, primary_key=True)
+    approval_id = Column(
+        String,
+        ForeignKey("reward_approvals.approval_id"),
+        nullable=True
+    )
     idempotency_key = Column(String, nullable=False)
     request_hash = Column(String, nullable=False)
     customer_id = Column(
