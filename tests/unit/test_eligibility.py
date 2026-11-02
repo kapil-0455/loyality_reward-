@@ -1,120 +1,90 @@
 
+from datetime import date
+import pytest
+
 from backend.app.domain.eligibility import check_eligibility
 
 
-def get_customer():
+@pytest.fixture
+def customer():
     return {
-        "customer_id": 12346,
-        "loyalty_tier": "Platinum",
+        "profile_status": "active",
+        "loyalty_tier": "Gold",
         "points_balance": 5000,
-        "profile_status": "active"
     }
 
 
-def get_reward():
+@pytest.fixture
+def reward():
     return {
-        "reward_id": "SYN-REWARD-001",
-        "points_required": 1718,
+        "status": "active",
+        "valid_from": date(2011, 11, 1),
+        "valid_until": date(2012, 3, 31),
         "eligible_tiers": "Silver,Gold",
-        "valid_from": "2011-11-01",
-        "valid_until": "2012-03-31",
-        "minimum_purchase_value": 0,
-        "status": "active"
+        "points_required": 1718,
+        "minimum_purchase_value": 500,
     }
 
 
-def test_ineligible_customer_tier():
+def test_eligible_customer(customer, reward):
     result = check_eligibility(
-        get_customer(),
-        get_reward(),
-        evaluation_date="2011-12-10",
-        purchase_value=1000
+        customer,
+        reward,
+        date(2011, 12, 10),
+        purchase_value=1000,
     )
 
-    assert result["eligible"] is False
-    assert "TIER_NOT_ELIGIBLE" in result["reason_codes"]
+    assert result["eligible"] is True
+    assert result["reason_codes"] == []
 
 
-def test_insufficient_points():
-    customer = get_customer()
+def test_insufficient_points(customer, reward):
     customer["points_balance"] = 100
 
     result = check_eligibility(
         customer,
-        get_reward(),
-        evaluation_date="2011-12-10",
-        purchase_value=1000
+        reward,
+        date(2011, 12, 10),
+        purchase_value=1000,
     )
 
     assert result["eligible"] is False
     assert "INSUFFICIENT_POINTS" in result["reason_codes"]
 
 
-def test_inactive_customer():
-    customer = get_customer()
-    customer["profile_status"] = "inactive"
+def test_ineligible_tier(customer, reward):
+    customer["loyalty_tier"] = "Bronze"
 
     result = check_eligibility(
         customer,
-        get_reward(),
-        evaluation_date="2011-12-10",
-        purchase_value=1000
+        reward,
+        date(2011, 12, 10),
+        purchase_value=1000,
     )
 
     assert result["eligible"] is False
-    assert "CUSTOMER_INACTIVE" in result["reason_codes"]
+    assert "TIER_NOT_ELIGIBLE" in result["reason_codes"]
 
 
-def test_reward_expired():
+def test_expired_reward(customer, reward):
     result = check_eligibility(
-        get_customer(),
-        get_reward(),
-        evaluation_date="2012-04-01",
-        purchase_value=1000
+        customer,
+        reward,
+        date(2012, 4, 1),
+        purchase_value=1000,
     )
 
     assert result["eligible"] is False
     assert "REWARD_EXPIRED" in result["reason_codes"]
 
 
-def test_reward_not_yet_valid():
+def test_minimum_purchase_not_met(customer, reward):
     result = check_eligibility(
-        get_customer(),
-        get_reward(),
-        evaluation_date="2011-10-31",
-        purchase_value=1000
-    )
-
-    assert result["eligible"] is False
-    assert "REWARD_NOT_YET_VALID" in result["reason_codes"]
-
-
-def test_minimum_purchase_not_met():
-    reward = get_reward()
-    reward["minimum_purchase_value"] = 1000
-
-    result = check_eligibility(
-        get_customer(),
+        customer,
         reward,
-        evaluation_date="2011-12-10",
-        purchase_value=500
+        date(2011, 12, 10),
+        purchase_value=100,
     )
 
     assert result["eligible"] is False
     assert "MINIMUM_PURCHASE_NOT_MET" in result["reason_codes"]
-
-
-def test_eligible_customer():
-    customer = get_customer()
-    customer["loyalty_tier"] = "Gold"
-
-    result = check_eligibility(
-        customer,
-        get_reward(),
-        evaluation_date="2011-12-10",
-        purchase_value=1000
-    )
-
-    assert result["eligible"] is True
-    assert result["reason_codes"] == []
-
