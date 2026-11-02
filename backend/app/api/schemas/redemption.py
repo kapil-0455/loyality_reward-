@@ -1,8 +1,9 @@
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class RedemptionRequest(BaseModel):
+    approval_id: str
     customer_id: int
     reward_id: str
     campaign_id: str
@@ -10,6 +11,8 @@ class RedemptionRequest(BaseModel):
 
 
 class RedemptionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     redemption_id: str
     customer_id: int
     reward_id: str
