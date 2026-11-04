@@ -1,3 +1,4 @@
+
 """
 Shared State for Loyalty Reward LangGraph Workflow.
 """
@@ -6,6 +7,7 @@ from typing import Any, TypedDict
 
 
 class RewardGraphState(TypedDict, total=False):
+
     # Request and routing
     request: str
     user_role: str
@@ -16,19 +18,35 @@ class RewardGraphState(TypedDict, total=False):
     customer_id: int
     customer_context: dict[str, Any]
     customer_data: Any
+    customer: dict[str, Any]
+
+    # Reward and campaign identifiers
+    reward_id: str
+    campaign_id: str
+    product_id: str
 
     # Data Agent inputs
     data_request_type: str
     data_parameters: dict[str, Any]
 
+    # Retrieved data
+    transaction_data: Any
+    reward: dict[str, Any]
+    reward_data: Any
+    reward_mappings: list[dict[str, Any]]
+
+    # Inventory data
+    inventory: list[dict[str, Any]]
+    inventory_data: Any
+
+    # Campaign data
+    campaign: dict[str, Any]
+    campaign_data: Any
+
     # Analytics
     analytics_result: dict[str, Any]
 
     # Eligibility Agent inputs
-    customer: dict[str, Any]
-    reward: dict[str, Any]
-    inventory: dict[str, Any]
-    campaign: dict[str, Any]
     evaluation_date: str
     purchase_value: float
 

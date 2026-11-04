@@ -31,16 +31,14 @@ def route_after_analytics(state):
     return "eligibility"
 
 
-def route_after_eligibility(state):
-    """Send feasible rewards to Reward Agent."""
 
+def route_after_eligibility(state):
     if state.get("status") != "SUCCESS":
         return "end"
 
-    if not state.get("feasible_candidates"):
-        return "response"
-
+    # Reward Agent handles both available and empty candidates.
     return "reward"
+
 
 
 def route_after_reward(state):

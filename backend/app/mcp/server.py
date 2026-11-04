@@ -4,31 +4,22 @@ MCP Server
 Exposes approved read-only tools for the Loyalty Reward System.
 """
 
-from pathlib import Path
 from datetime import date, datetime
 from decimal import Decimal
+from pathlib import Path
 
 import pandas as pd
 from fastmcp import FastMCP
 
-from backend.app.db.session import SessionLocal
-
-from backend.app.db.repositories.customer_repository import (
-    get_customer_by_id
-)
-
+from backend.app.db.models import RewardProductMapping, RewardCatalogue
+from backend.app.db.models import RewardProductMapping
+from backend.app.db.repositories.campaign_repository import get_campaign_by_id
+from backend.app.db.repositories.customer_repository import get_customer_by_id
 from backend.app.db.repositories.inventory_repository import (
-    get_product_inventory as fetch_product_inventory
+    get_product_inventory as fetch_product_inventory,
 )
-
-from backend.app.db.repositories.campaign_repository import (
-    get_campaign_by_id
-)
-
-from backend.app.db.repositories.reward_repository import (
-    get_reward_by_id
-)
-
+from backend.app.db.repositories.reward_repository import get_reward_by_id
+from backend.app.db.session import SessionLocal
 
 mcp = FastMCP("LoyaltyRewardMCP")
 
@@ -304,6 +295,105 @@ def get_reward_details(reward_id: str) -> dict:
             "status": "DATABASE_ERROR",
             "error": str(error),
             "data": None
+        }
+
+    finally:
+        db.close()
+
+@mcp.tool
+def get_reward_product_mappings(reward_id: str):
+    """
+    Get all product mappings linked to a reward.
+    Returns product IDs and their inventory requirements.
+    """
+
+    if not reward_id or not reward_id.strip():
+        return {
+            "status": "INVALID_REWARD_ID",
+            "data": []
+        }
+
+    db = SessionLocal()
+
+    try:
+        mappings = (
+            db.query(RewardProductMapping)
+            .filter(
+                RewardProductMapping.reward_id == reward_id
+            )
+            .all()
+        )
+
+        mapping_data = [
+            {
+                "reward_id": mapping.reward_id,
+                "product_id": mapping.product_id,
+                "minimum_stock_required": mapping.minimum_stock_required,
+                "inventory_constraint_type": mapping.inventory_constraint_type
+            }
+            for mapping in mappings
+        ]
+
+        return {
+            "status": "SUCCESS",
+            "data": mapping_data
+        }
+
+    except Exception as error:
+        return {
+            "status": "DATABASE_ERROR",
+            "error": str(error),
+            "data": []
+        }
+
+    finally:
+        db.close()
+
+@mcp.tool
+def get_active_rewards() -> dict:
+    """
+    Retrieve all active rewards from the reward catalogue.
+    """
+
+    db = SessionLocal()
+
+    try:
+        rewards = (
+            db.query(RewardCatalogue)
+            .filter(RewardCatalogue.status == "active")
+            .all()
+        )
+
+        fields = [
+            "reward_id",
+            "reward_name",
+            "reward_type",
+            "reward_value",
+            "points_required",
+            "eligible_tiers",
+            "valid_from",
+            "valid_until",
+            "minimum_purchase_value",
+            "status",
+            "campaign_id",
+            "is_synthetic"
+        ]
+
+        reward_data = [
+            serialize_record(reward, fields)
+            for reward in rewards
+        ]
+
+        return {
+            "status": "SUCCESS",
+            "data": reward_data
+        }
+
+    except Exception as error:
+        return {
+            "status": "DATABASE_ERROR",
+            "error": str(error),
+            "data": []
         }
 
     finally:
