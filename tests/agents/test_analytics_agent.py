@@ -4,7 +4,7 @@ import pandas as pd
 from backend.app.agents import analytics_agent
 
 
-def create_test_datasets(tmp_path):
+def create_test_datasets(tmp_path, monkeypatch):
     rfm_file = tmp_path / "rfm.csv"
     segment_file = tmp_path / "segments.csv"
     loyalty_file = tmp_path / "loyalty.csv"
@@ -31,13 +31,14 @@ def create_test_datasets(tmp_path):
         }
     ]).to_csv(loyalty_file, index=False)
 
-    analytics_agent.RFM_FILE = rfm_file
-    analytics_agent.SEGMENT_FILE = segment_file
-    analytics_agent.LOYALTY_FILE = loyalty_file
+    # monkeypatch automatically restores original paths after each test
+    monkeypatch.setattr(analytics_agent, "RFM_FILE", rfm_file)
+    monkeypatch.setattr(analytics_agent, "SEGMENT_FILE", segment_file)
+    monkeypatch.setattr(analytics_agent, "LOYALTY_FILE", loyalty_file)
 
 
-def test_successful_analytics(tmp_path):
-    create_test_datasets(tmp_path)
+def test_successful_analytics(tmp_path, monkeypatch):
+    create_test_datasets(tmp_path, monkeypatch)
 
     result = analytics_agent.run_analytics_agent(101)
 
@@ -53,16 +54,16 @@ def test_invalid_customer_id():
     assert result["status"] == "INVALID_CUSTOMER_ID"
 
 
-def test_customer_not_found(tmp_path):
-    create_test_datasets(tmp_path)
+def test_customer_not_found(tmp_path, monkeypatch):
+    create_test_datasets(tmp_path, monkeypatch)
 
     result = analytics_agent.run_analytics_agent(999)
 
     assert result["status"] == "CUSTOMER_DATA_NOT_FOUND"
 
 
-def test_duplicate_customer_data(tmp_path):
-    create_test_datasets(tmp_path)
+def test_duplicate_customer_data(tmp_path, monkeypatch):
+    create_test_datasets(tmp_path, monkeypatch)
 
     pd.DataFrame([
         {"customer_id": "101", "cluster": 2},
@@ -74,10 +75,14 @@ def test_duplicate_customer_data(tmp_path):
     assert result["status"] == "DUPLICATE_CUSTOMER_DATA"
 
 
-def test_missing_dataset(tmp_path):
-    create_test_datasets(tmp_path)
+def test_missing_dataset(tmp_path, monkeypatch):
+    create_test_datasets(tmp_path, monkeypatch)
 
-    analytics_agent.RFM_FILE = tmp_path / "missing.csv"
+    monkeypatch.setattr(
+        analytics_agent,
+        "RFM_FILE",
+        tmp_path / "missing.csv"
+    )
 
     result = analytics_agent.run_analytics_agent(101)
 
