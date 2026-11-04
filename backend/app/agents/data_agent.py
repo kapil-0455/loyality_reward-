@@ -114,7 +114,7 @@ async def run_data_agent(mcp_client, request_type, parameters):
             "data": payload.get("data", payload)
         }
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
 
         return {
             "status": "MCP_TOOL_ERROR",

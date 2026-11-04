@@ -173,7 +173,7 @@ def run_analytics_agent(customer_id):
             "analytics": analytics
         }
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
 
         return {
             "status": "ANALYTICS_ERROR",

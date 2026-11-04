@@ -72,13 +72,12 @@ def check_inventory(
         if (
             replenishment_date is not None
             and evaluation_date is not None
+        ) and (
+            replenishment_date <= convert_to_date(evaluation_date)
+            and remaining_stock + replenishment_quantity
+            >= minimum_stock_level
         ):
-            if (
-                replenishment_date <= convert_to_date(evaluation_date)
-                and remaining_stock + replenishment_quantity
-                >= minimum_stock_level
-            ):
-                replenishment_can_restore_minimum = True
+            replenishment_can_restore_minimum = True
 
         if not replenishment_can_restore_minimum:
             reason_codes.append("REPLENISHMENT_CONSTRAINT")

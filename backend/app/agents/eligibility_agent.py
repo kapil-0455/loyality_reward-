@@ -50,7 +50,7 @@ def run_eligibility_agent(
         else:
             for item in inventory_items:
                 if not isinstance(item, dict):
-                    raise ValueError("Each inventory item must be a dictionary")
+                    raise ValueError("Each inventory item must be a dictionary")  # noqa: TRY004
 
                 result = check_inventory(
                     on_hand_stock=item["on_hand_stock"],
@@ -122,5 +122,5 @@ def run_eligibility_agent(
     except (KeyError, TypeError, ValueError) as error:
         return {"status": "VALIDATION_ERROR", "error": str(error), "candidate": None}
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         return {"status": "ELIGIBILITY_ERROR", "error": str(error), "candidate": None}

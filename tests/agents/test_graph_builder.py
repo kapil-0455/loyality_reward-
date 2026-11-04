@@ -3,7 +3,6 @@ import pytest
 from backend.app.agents import graph_nodes
 from backend.app.agents.graph_builder import build_reward_graph
 
-
 MOCK_DATA = {
     "customer": {
         "customer_id": 101,

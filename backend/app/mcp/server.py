@@ -11,8 +11,7 @@ from pathlib import Path
 import pandas as pd
 from fastmcp import FastMCP
 
-from backend.app.db.models import RewardProductMapping, RewardCatalogue
-from backend.app.db.models import RewardProductMapping
+from backend.app.db.models import RewardCatalogue, RewardProductMapping
 from backend.app.db.repositories.campaign_repository import get_campaign_by_id
 from backend.app.db.repositories.customer_repository import get_customer_by_id
 from backend.app.db.repositories.inventory_repository import (
@@ -80,7 +79,7 @@ def get_customer_profile(customer_id: int) -> dict:
             "data": serialize_record(customer, fields)
         }
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         return {
             "status": "DATABASE_ERROR",
             "error": str(error),
@@ -167,7 +166,7 @@ def get_transaction_history(
             "data": serialized_transactions
         }
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         return {
             "status": "DATA_ERROR",
             "error": str(error),
@@ -205,7 +204,7 @@ def get_product_inventory(product_id: str) -> dict:
             "data": serialize_record(inventory, fields)
         }
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         return {
             "status": "DATABASE_ERROR",
             "error": str(error),
@@ -245,7 +244,7 @@ def get_campaign_details(campaign_id: str) -> dict:
             "data": serialize_record(campaign, fields)
         }
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         return {
             "status": "DATABASE_ERROR",
             "error": str(error),
@@ -290,7 +289,7 @@ def get_reward_details(reward_id: str) -> dict:
             "data": serialize_record(reward, fields)
         }
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         return {
             "status": "DATABASE_ERROR",
             "error": str(error),
@@ -339,7 +338,7 @@ def get_reward_product_mappings(reward_id: str):
             "data": mapping_data
         }
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         return {
             "status": "DATABASE_ERROR",
             "error": str(error),
@@ -389,7 +388,7 @@ def get_active_rewards() -> dict:
             "data": reward_data
         }
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         return {
             "status": "DATABASE_ERROR",
             "error": str(error),

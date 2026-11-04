@@ -1,6 +1,7 @@
 
-import pytest
 from unittest.mock import AsyncMock
+
+import pytest
 
 from backend.app.agents.data_agent import run_data_agent
 

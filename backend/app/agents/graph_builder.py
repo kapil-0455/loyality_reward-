@@ -4,18 +4,17 @@ LangGraph Builder
 Connects all six agents into one workflow.
 """
 
-from langgraph.graph import StateGraph, END
-
-from backend.app.agents.graph_state import RewardGraphState
-from backend.app.agents.graph_nodes import build_agent_nodes
+from langgraph.graph import END, StateGraph
 
 from backend.app.agents.graph_edges import (
-    route_after_router,
-    route_after_data,
     route_after_analytics,
+    route_after_data,
     route_after_eligibility,
     route_after_reward,
+    route_after_router,
 )
+from backend.app.agents.graph_nodes import build_agent_nodes
+from backend.app.agents.graph_state import RewardGraphState
 
 
 def build_reward_graph(mcp_client, llm=None, laya_router=None):
