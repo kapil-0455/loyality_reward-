@@ -1,21 +1,20 @@
 
-from datetime import datetime, timezone
-from hashlib import sha256
 import json
+from datetime import UTC, datetime
+from hashlib import sha256
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
 from backend.app.db.models import (
+    CampaignBudget,
     CustomerLoyaltyProfile,
+    InventorySnapshot,
     RewardApproval,
     RewardCatalogue,
-    CampaignBudget,
-    RewardProductMapping,
-    InventorySnapshot,
     RewardLedger,
+    RewardProductMapping,
 )
-
 from backend.app.domain.eligibility import check_eligibility
 
 
@@ -238,7 +237,7 @@ def redeem_reward(db: Session, request):
             points_debited=approval.points_required,
             reward_cost=approval.reward_cost,
             redemption_status="REDEEMED",
-            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+            created_at=datetime.now(UTC).replace(tzinfo=None),
             is_synthetic=customer.is_synthetic,
         )
 

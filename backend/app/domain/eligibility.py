@@ -58,10 +58,13 @@ def check_eligibility(
     # 6. Check minimum purchase requirement
     minimum_purchase = reward["minimum_purchase_value"]
 
-    if purchase_value < minimum_purchase:
+    if (
+        minimum_purchase is not None
+        and purchase_value < minimum_purchase
+    ):
         reason_codes.append("MINIMUM_PURCHASE_NOT_MET")
 
     return {
         "eligible": len(reason_codes) == 0,
         "reason_codes": reason_codes
-   }
+    }

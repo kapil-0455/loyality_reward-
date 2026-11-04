@@ -34,7 +34,6 @@ def recommend_rewards(customer_id, evaluated_candidates):
         )
 
         all_candidates.append(candidate)
-
         all_reason_codes.extend(candidate.reason_codes)
 
     # 2. Build feasible candidate set
