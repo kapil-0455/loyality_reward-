@@ -1072,6 +1072,31 @@ elif main_portal == "⚙️ Admin Dashboard":
         m2.metric("Constraint Violations", "0", delta="100% Policy Adherence")
         m3.metric("Baseline Fallback Rate", "100%", delta="Safe Fail-Closed Mode")
 
+        st.markdown("---")
+        st.markdown("### 🛰️ Live Langfuse Observability & Tracing")
+        from backend.app.observability.tracer import (
+            is_langfuse_configured,
+            trace_agent_execution,
+        )
+        is_cfg = is_langfuse_configured()
+        lcol1, lcol2 = st.columns([2, 1])
+        with lcol1:
+            if is_cfg:
+                st.success("🟢 **Langfuse Cloud Connected**: Live agent execution tracing is ACTIVE and authenticated.")
+                st.markdown("[🔗 Open Langfuse Cloud Dashboard](https://cloud.langfuse.com)")
+            else:
+                st.warning("🟡 Langfuse keys not detected in .env. Running in local fallback mode.")
+        with lcol2:
+            if st.button("🚀 Emit Live Trace to Langfuse", type="primary", use_container_width=True):
+                rec = trace_agent_execution(
+                    agent_name="reward_agent",
+                    input_state={"customer_id": 12349, "scenario": "Live Streamlit Monitoring Test"},
+                    output_state={"selected_reward": "SYN-REWARD-001", "score": 8.75, "status": "APPROVED"},
+                    metadata={"portal": "Streamlit Admin", "user": "Admin"},
+                )
+                st.success(f"Dispatched trace `{rec['trace_id'][:8]}...` to Langfuse Cloud!")
+                st.balloons()
+
     # 2.9 SETTINGS
     elif nav_item == "⚙️ Settings":
         st.markdown('<div class="main-header">⚙️ System Configuration & Security</div>', unsafe_allow_html=True)

@@ -1,5 +1,7 @@
 from pathlib import Path
+
 import pandas as pd
+
 from backend.app.db.models import CustomerRFMSegment
 from backend.app.db.session import SessionLocal
 
@@ -31,7 +33,7 @@ def get_customer_segment(customer_id: int):
                 "monetary": float(record.monetary),
                 "cluster": int(record.cluster),
             }
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass
     finally:
         if db:

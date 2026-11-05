@@ -5,6 +5,7 @@ and customer loyalty profiles via Neon PostgreSQL with local CSV fallback.
 """
 
 from pathlib import Path
+
 import pandas as pd
 
 from backend.app.db.models import (
@@ -163,7 +164,7 @@ def run_analytics_agent(customer_id):
             "analytics": analytics,
         }
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         return {
             "status": "ANALYTICS_ERROR",
             "error": str(error),

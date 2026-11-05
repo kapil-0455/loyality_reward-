@@ -10,6 +10,10 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 logger = logging.getLogger(__name__)
 
 _in_memory_traces: list[dict[str, Any]] = []
@@ -31,10 +35,16 @@ def get_langfuse_client():
     try:
         from langfuse import Langfuse
 
+        host = (
+            os.getenv("LANGFUSE_HOST")
+            or os.getenv("LANGFUSE_BASE_URL")
+            or "https://us.cloud.langfuse.com"
+        )
+
         return Langfuse(
             public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
             secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
-            host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"),
+            host=host,
         )
     except Exception as exc:  # noqa: BLE001
         logger.warning("Failed to initialize Langfuse client: %s", exc)
@@ -73,14 +83,34 @@ def trace_agent_execution(
     client = get_langfuse_client()
     if client is not None:
         try:
-            client.trace(
-                id=trace_id,
-                name=f"agent:{agent_name}",
-                input=input_state,
-                output=output_state,
-                metadata=metadata,
-                tags=[agent_name, status],
-            )
+            if hasattr(client, "trace"):
+                try:
+                    client.trace(
+                        id=trace_id,
+                        name=f"agent:{agent_name}",
+                        input=input_state,
+                        output=output_state,
+                        metadata=metadata,
+                        tags=[agent_name, status],
+                    )
+                except AttributeError:
+                    if hasattr(client, "start_observation"):
+                        obs = client.start_observation(
+                            name=f"agent:{agent_name}",
+                            input=input_state,
+                            metadata=metadata,
+                        )
+                        obs.update(output=output_state)
+            elif hasattr(client, "start_observation"):
+                obs = client.start_observation(
+                    name=f"agent:{agent_name}",
+                    input=input_state,
+                    metadata=metadata,
+                )
+                obs.update(output=output_state)
+
+            if hasattr(client, "flush"):
+                client.flush()
         except Exception as exc:  # noqa: BLE001
             logger.warning("Failed to emit agent trace to Langfuse: %s", exc)
 
@@ -116,12 +146,30 @@ def trace_tool_execution(
     client = get_langfuse_client()
     if client is not None:
         try:
-            client.span(
-                id=span_id,
-                name=f"tool:{tool_name}",
-                input=arguments,
-                output=result,
-            )
+            if hasattr(client, "span"):
+                try:
+                    client.span(
+                        id=span_id,
+                        name=f"tool:{tool_name}",
+                        input=arguments,
+                        output=result,
+                    )
+                except AttributeError:
+                    if hasattr(client, "start_observation"):
+                        obs = client.start_observation(
+                            name=f"tool:{tool_name}",
+                            input=arguments,
+                        )
+                        obs.update(output=result)
+            elif hasattr(client, "start_observation"):
+                obs = client.start_observation(
+                    name=f"tool:{tool_name}",
+                    input=arguments,
+                )
+                obs.update(output=result)
+
+            if hasattr(client, "flush"):
+                client.flush()
         except Exception as exc:  # noqa: BLE001
             logger.warning("Failed to emit tool span to Langfuse: %s", exc)
 
