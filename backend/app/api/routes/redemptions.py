@@ -63,6 +63,7 @@ def create_redemption(
 def get_redemption(
     redemption_id: str,
     db: Session = Depends(get_db),
+    manager: bool = Depends(require_campaign_manager),
 ):
     from backend.app.db.repositories.redemption_repository import (
         get_redemption_by_id,
