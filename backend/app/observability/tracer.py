@@ -4,10 +4,13 @@ Provides tracing for agent nodes, decision layers, and MCP tools
 with Langfuse integration and in-memory trace verification.
 """
 
+import logging
 import os
 from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
+
+logger = logging.getLogger(__name__)
 
 _in_memory_traces: list[dict[str, Any]] = []
 
@@ -33,7 +36,8 @@ def get_langfuse_client():
             secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
             host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"),
         )
-    except ImportError :  
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Failed to initialize Langfuse client: %s", exc)
         return None
 
 
@@ -77,8 +81,8 @@ def trace_agent_execution(
                 metadata=metadata,
                 tags=[agent_name, status],
             )
-        except Exception as e :  # noqa: BLE001
-            pass
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Failed to emit agent trace to Langfuse: %s", exc)
 
     return record
 
@@ -118,8 +122,8 @@ def trace_tool_execution(
                 input=arguments,
                 output=result,
             )
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Failed to emit tool span to Langfuse: %s", exc)
 
     return record
 
