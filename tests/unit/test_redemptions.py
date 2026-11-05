@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
+from backend.app.api.security import require_campaign_manager
 from backend.app.api.routes import redemptions
 
 
@@ -13,6 +14,7 @@ def client():
     def override_get_db():
         yield None
 
+    app.dependency_overrides[require_campaign_manager] = lambda: True
     app.dependency_overrides[redemptions.get_db] = override_get_db
 
     with TestClient(app) as test_client:
