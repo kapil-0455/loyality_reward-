@@ -51,15 +51,45 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    .main-header { font-size: 2.1rem; font-weight: 700; color: #1E3A8A; margin-bottom: 0.2rem; }
-    .sub-header { font-size: 1.05rem; color: #4B5563; margin-bottom: 1.2rem; }
-    .card { background-color: #FFFFFF; padding: 1.2rem; border-radius: 0.6rem; border: 1px solid #E5E7EB; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 1rem; }
-    .badge-success { background-color: #DEF7EC; color: #03543F; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; }
-    .badge-warning { background-color: #FEF08A; color: #713F12; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; }
-    .badge-danger { background-color: #FDE8E8; color: #9B1C1C; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; }
-    .badge-info { background-color: #E1EFFE; color: #1E429F; padding: 0.25rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; }
-    .stat-label { font-size: 0.85rem; color: #6B7280; font-weight: 500; }
-    .stat-val { font-size: 1.5rem; color: #111827; font-weight: 700; }
+    .main-header { font-size: 2.1rem; font-weight: 700; color: #60A5FA; margin-bottom: 0.2rem; }
+    .sub-header { font-size: 1.05rem; color: #94A3B8; margin-bottom: 1.2rem; }
+    
+    .card { 
+        background-color: #1E293B; 
+        color: #F8FAFC !important; 
+        padding: 1.25rem; 
+        border-radius: 0.75rem; 
+        border: 1px solid #334155; 
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25); 
+        margin-bottom: 1rem; 
+    }
+    .card h3, .card h4 { 
+        color: #F8FAFC !important; 
+        margin-top: 0; 
+        margin-bottom: 0.5rem; 
+        font-weight: 600; 
+    }
+    .card p { 
+        color: #CBD5E1 !important; 
+        font-size: 0.95rem; 
+        line-height: 1.5; 
+        margin-bottom: 0.5rem; 
+    }
+    .card b, .card strong { 
+        color: #FFFFFF !important; 
+    }
+    .card code { 
+        color: #38BDF8 !important; 
+        background-color: #0F172A !important; 
+        padding: 0.15rem 0.4rem; 
+        border-radius: 0.25rem; 
+        font-size: 0.85rem; 
+    }
+    
+    .badge-success { background-color: #064E3B; color: #34D399 !important; border: 1px solid #059669; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; }
+    .badge-warning { background-color: #713F12; color: #FDE047 !important; border: 1px solid #A16207; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; }
+    .badge-danger { background-color: #7F1D1D; color: #FCA5A5 !important; border: 1px solid #DC2626; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; }
+    .badge-info { background-color: #1E3A8A; color: #93C5FD !important; border: 1px solid #2563EB; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; }
     </style>
     """,
     unsafe_allow_html=True,
