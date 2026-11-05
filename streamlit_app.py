@@ -3,30 +3,23 @@ Loyalty and Reward Optimisation Platform
 Streamlit MVP: Customer Dashboard, Admin Operations, and Interactive Demos.
 """
 
-from datetime import date, datetime
+
+from datetime import date
 from decimal import Decimal
-import json
 from uuid import uuid4
 
 import pandas as pd
 import streamlit as st
 
 from backend.app.db.models import (
-    CampaignBudget,
-    CustomerLoyaltyProfile,
-    InventorySnapshot,
     RewardApproval,
-    RewardCatalogue,
     RewardLedger,
-    RewardProductMapping,
 )
 from backend.app.db.repositories.campaign_repository import get_all_campaigns
 from backend.app.db.repositories.customer_repository import get_customer_by_id
 from backend.app.db.repositories.inventory_repository import get_all_inventory
 from backend.app.db.repositories.reward_repository import get_active_rewards
 from backend.app.db.session import SessionLocal
-from backend.app.decision.baseline_ranker import rank_rewards_baseline
-from backend.app.decision.laya_adapter import select_reward_with_laya
 from backend.app.domain.budget import check_campaign_budget
 from backend.app.domain.eligibility import check_eligibility
 from backend.app.domain.inventory import check_inventory
@@ -541,3 +534,4 @@ elif app_mode == "📊 Architecture & Evidence":
         {"Test Suite Group": "Database Rollback Consistency", "Location": "tests/integration/test_db_rollback.py", "Tests": 3, "Status": "PASSED"},
     ]
     st.dataframe(pd.DataFrame(test_groups), use_container_width=True)
+
