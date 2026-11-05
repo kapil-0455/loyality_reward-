@@ -55,7 +55,7 @@ st.markdown(
     .sub-header { font-size: 1.05rem; color: #94A3B8; margin-bottom: 1.2rem; }
     
     .card { 
-        background-color: #1E293B; 
+        background-color: #1E293B !important; 
         color: #F8FAFC !important; 
         padding: 1.25rem; 
         border-radius: 0.75rem; 
@@ -63,19 +63,30 @@ st.markdown(
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25); 
         margin-bottom: 1rem; 
     }
-    .card h3, .card h4 { 
+    /* Force dark background even inside Streamlit's markdown wrappers */
+    div[data-testid="stMarkdownContainer"] .card,
+    div[data-testid="stMarkdown"] .card {
+        background-color: #1E293B !important;
+        color: #F8FAFC !important;
+    }
+    .card h3, .card h4, 
+    div[data-testid="stMarkdownContainer"] .card h3,
+    div[data-testid="stMarkdownContainer"] .card h4 { 
         color: #F8FAFC !important; 
         margin-top: 0; 
         margin-bottom: 0.5rem; 
         font-weight: 600; 
     }
-    .card p { 
+    .card p,
+    div[data-testid="stMarkdownContainer"] .card p { 
         color: #CBD5E1 !important; 
         font-size: 0.95rem; 
         line-height: 1.5; 
         margin-bottom: 0.5rem; 
     }
-    .card b, .card strong { 
+    .card b, .card strong,
+    div[data-testid="stMarkdownContainer"] .card b,
+    div[data-testid="stMarkdownContainer"] .card strong { 
         color: #FFFFFF !important; 
     }
     .card code { 
