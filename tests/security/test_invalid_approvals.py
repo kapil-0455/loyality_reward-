@@ -308,3 +308,37 @@ def test_approval_rejects_reward_campaign_mismatch(db):
     with pytest.raises(ValueError, match="Reward does not belong to this campaign"):
         approve_reward(db, request)
 
+def test_redemption_idempotency_tampering_rejected(db):
+    """Reusing a redemption idempotency key with a changed payload is rejected."""
+    approval_request = SimpleNamespace(
+        customer_id=12347,
+        reward_id="REWARD-001",
+        campaign_id="CAMP-001",
+        purchase_value=Decimal("1000"),
+        evaluation_date=date(2011, 12, 10),
+        approved=True,
+        idempotency_key="approval-redemption-idem-001",
+    )
+    approval = approve_reward(db, approval_request)
+
+    original_redemption = SimpleNamespace(
+        approval_id=approval.approval_id,
+        customer_id=12347,
+        reward_id="REWARD-001",
+        campaign_id="CAMP-001",
+        idempotency_key="redemption-idem-tamper-001",
+    )
+    redeem_reward(db, original_redemption)
+
+    tampered_redemption = SimpleNamespace(
+        approval_id=approval.approval_id,
+        customer_id=99999,
+        reward_id="REWARD-001",
+        campaign_id="CAMP-001",
+        idempotency_key="redemption-idem-tamper-001",
+    )
+
+    with pytest.raises(
+        ValueError, match="Idempotency key already used with different request"
+    ):
+        redeem_reward(db, tampered_redemption)
