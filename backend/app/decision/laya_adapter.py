@@ -1,3 +1,4 @@
+import math
 
 from laya import Router
 
@@ -65,7 +66,6 @@ def select_reward_with_laya(
             }
         }
 
-        # Actual Laya inference
         result = router.predict(
             state,
             questions,
@@ -73,11 +73,14 @@ def select_reward_with_laya(
         )
 
         answer = result["answers"]["reward_choice"]
-
         selected_id = answer["choice"]
         confidence = float(answer["answer_confidence"])
 
-        # Validate Laya's selection
+        # A probability must be finite and within [0, 1].
+        # NaN otherwise bypasses a simple confidence < threshold check.
+        if not math.isfinite(confidence) or not 0.0 <= confidence <= 1.0:
+            raise ValueError("Laya returned an invalid confidence value")
+
         candidate_map = {
             candidate.reward_id: candidate
             for candidate in candidates
@@ -107,5 +110,4 @@ def select_reward_with_laya(
         ]
 
     except Exception:  # noqa: BLE001
-        # Safe fallback to existing deterministic ranker
         return rank_rewards(candidates)

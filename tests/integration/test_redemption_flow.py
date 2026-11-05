@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from backend.app.main import app
+from backend.app.api.security import require_campaign_manager
 from backend.app.api.routes import approvals, redemptions
 from backend.app.db.models import (
     Base,
@@ -112,6 +113,7 @@ def client(db):
     def override_get_db():
         yield db
 
+    app.dependency_overrides[require_campaign_manager] = lambda: True
     app.dependency_overrides[approvals.get_db] = override_get_db
     app.dependency_overrides[redemptions.get_db] = override_get_db
 

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from backend.app.api.security import require_campaign_manager
 from backend.app.api.schemas.approval import (
     ApprovalRequest,
     ApprovalResponse,
@@ -30,6 +31,7 @@ def get_db():
 def create_approval(
     request: ApprovalRequest,
     db: Session = Depends(get_db),
+    manager: bool = Depends(require_campaign_manager),
 ):
     try:
         approval = approve_reward(db, request)

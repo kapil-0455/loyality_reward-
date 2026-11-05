@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from backend.app.api.security import require_campaign_manager
 from backend.app.api.schemas.redemption import (
     RedemptionRequest,
     RedemptionResponse,
@@ -31,6 +32,7 @@ def get_db():
 def create_redemption(
     request: RedemptionRequest,
     db: Session = Depends(get_db),
+    manager: bool = Depends(require_campaign_manager),
 ):
     try:
         redemption = redeem_reward(db, request)
@@ -61,6 +63,7 @@ def create_redemption(
 def get_redemption(
     redemption_id: str,
     db: Session = Depends(get_db),
+    manager: bool = Depends(require_campaign_manager),
 ):
     from backend.app.db.repositories.redemption_repository import (
         get_redemption_by_id,
