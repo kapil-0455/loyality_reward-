@@ -98,9 +98,17 @@ Existing tests verify that:
 
 Relevant test: `tests/agents/test_security_guardrails.py`.
 
-**Not fully verified by the current automated suite:**
+**Authentication update on this branch:**
 
-- Application-wide authentication and authorisation on every approval/redemption API route.
+- Added `backend/app/api/security.py` with a fail-closed shared bearer-token dependency using `CAMPAIGN_MANAGER_API_TOKEN`.
+- Protected `POST /rewards/approvals`, `POST /rewards/redemptions`, and `GET /rewards/redemptions/{redemption_id}`.
+- Updated existing approval/redemption API and integration test fixtures to override the authentication dependency where the test is exercising business logic.
+- Added `tests/security/test_sensitive_api_auth.py` for missing token, invalid token, and missing server configuration across all three protected routes.
+- Configure `CAMPAIGN_MANAGER_API_TOKEN` as a secret environment variable in the runtime. Do not commit the actual token.
+
+**Remaining security gaps:**
+
+- This is a shared-token MVP gate, not individual user identity, role-based authorisation, or per-campaign/object permission checking.
 - A complete prompt-injection attack matrix against every agent/tool boundary.
 - Dedicated sensitive-data leakage tests across all API and log outputs.
 - Invalid approval and approval-tampering cases as a separate security test group.
@@ -112,8 +120,8 @@ The agent tool restrictions do not replace API-level authentication and authoris
 1. The synthetic Laya evaluation has no labelled preference/redemption ground truth; it cannot establish recommendation accuracy.
 2. All eight Laya decisions were rejected by the configured confidence threshold, so the evaluated final selections used the baseline.
 3. The checkpoint temperature warning concerns `choice:11+`; the active `choice:3-5` bucket still needs direct calibration verification.
-4. Application-wide API authentication/authorisation requires independent verification.
-5. The full test suite must be rerun after the Day 6 regression fixes are pulled locally.
+4. The shared manager token protects the approval/redemption routes, but individual manager identity, role-based permissions, per-object authorisation, token rotation and audit attribution are not implemented.
+5. The 126-pass full-suite result predates the Day 6 regression/security changes. The newly added authentication tests and updated route fixtures still require local execution before the branch can be called fully verified.
 6. PostgreSQL concurrency tests require a valid `TEST_DATABASE_URL`; do not point it at a production database.
 
 ## 8. Reproduction Commands
