@@ -8,7 +8,7 @@ bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def require_campaign_manager(
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),  # noqa: B008
 ) -> bool:
     """Require the shared campaign-manager bearer token for sensitive routes."""
     expected_token = os.getenv("CAMPAIGN_MANAGER_API_TOKEN")
