@@ -5,9 +5,13 @@ from sqlalchemy.orm import sessionmaker
 from backend.app.config import DATABASE_URL
 from backend.app.db.models import Base
 
+clean_db_url = DATABASE_URL
+if clean_db_url and clean_db_url.startswith("postgres://"):
+    clean_db_url = clean_db_url.replace("postgres://", "postgresql://", 1)
+
 # Create database engine
 engine = create_engine(
-    DATABASE_URL,
+    clean_db_url,
     pool_pre_ping=True
 )
 
