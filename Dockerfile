@@ -25,6 +25,6 @@ COPY . /app
 # Expose ports: 8000 for FastAPI, 8501 for Streamlit
 EXPOSE 8000 8501
 
-# Default command: launch FastAPI server
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default command: launch FastAPI server (supports dynamic cloud PORT or defaults to 8000)
+CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
 
