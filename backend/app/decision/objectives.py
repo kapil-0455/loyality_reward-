@@ -1,3 +1,5 @@
+import math
+
 
 def calculate_reward_score(
     relevance,
@@ -8,7 +10,7 @@ def calculate_reward_score(
     """
     Calculate reward score using weighted objectives.
 
-    All input values must be between 0 and 100.
+    All input values must be finite numbers between 0 and 100.
     """
 
     values = [
@@ -18,8 +20,11 @@ def calculate_reward_score(
         cost_penalty
     ]
 
-    if any(value < 0 or value > 100 for value in values):
-        raise ValueError("All objective values must be between 0 and 100")
+    if any(
+        not math.isfinite(value) or value < 0 or value > 100
+        for value in values
+    ):
+        raise ValueError("All objective values must be finite numbers between 0 and 100")
 
     score = (
         0.35 * relevance
