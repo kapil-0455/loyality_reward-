@@ -45,3 +45,4 @@ The decision layer was benchmarked across 8 synthetic evaluation scenarios:
 2. **Mean Laya Confidence:** **0.45** (Below the 0.60 calibration threshold).
 3. **Safety Fallback Execution:** **100%** successful failover to the deterministic baseline.
 4. **Conclusion:** While Laya proposes reasonable candidates, its confidence is uncalibrated ($\le 0.52$). The fail-closed architecture guarantees that business safety constraints remain uncompromised at all times.
+

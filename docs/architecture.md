@@ -79,3 +79,4 @@ Exposes granular database and operational capabilities through standardized MCP 
 ### 2.5 Data Persistence Layer (PostgreSQL)
 - Hosted on Neon Serverless PostgreSQL.
 - Implements foreign key integrity, unique indexes on `idempotency_key`, and atomic transaction commits.
+

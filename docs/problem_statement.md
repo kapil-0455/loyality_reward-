@@ -20,3 +20,4 @@ The objective of this project is to build an **Inventory-Aware Reward Optimisati
 - **Agentic Workflow Orchestration:** Coordinate request routing, MCP data retrieval, RFM computation, constraint validation, and proposal generation via a 6-node LangGraph state machine.
 - **Transactional Integrity:** Provide atomic point deduction, budget commitments, and duplicate prevention via PostgreSQL row-level locks and idempotency keys.
 - **Enterprise Visual Portals:** Deliver dedicated Customer and Admin portals via Streamlit connected to real-time Neon PostgreSQL databases.
+

@@ -173,3 +173,23 @@ class RewardLedger(Base):
     redemption_status = Column(String, nullable=False)
     created_at = Column(DateTime, nullable=False)
     is_synthetic = Column(Boolean, nullable=False)
+
+
+class CustomerRFMSegment(Base):
+    __tablename__ = "customer_rfm_segments"
+
+    customer_id = Column(Numeric(12, 0), primary_key=True)
+    recency = Column(Integer, nullable=False)
+    frequency = Column(Integer, nullable=False)
+    monetary = Column(Numeric(12, 2), nullable=False)
+    cluster = Column(Integer, nullable=False)
+
+
+class RFMCustomerFeature(Base):
+    __tablename__ = "rfm_customer_features"
+
+    customer_id = Column(Numeric(12, 0), primary_key=True)
+    recency = Column(Integer, nullable=False)
+    frequency = Column(Integer, nullable=False)
+    monetary = Column(Numeric(12, 2), nullable=False)
+    last_purchase_date = Column(DateTime, nullable=True)

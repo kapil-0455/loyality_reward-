@@ -67,3 +67,4 @@ Because UCI Online Retail II does not contain points ledgers or live stock track
 
 5. **`RewardLedger` & `RewardApproval`:**
    - Immutable financial audit log with `idempotency_key` and timestamped point debits.
+
