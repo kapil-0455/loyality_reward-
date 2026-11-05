@@ -24,8 +24,8 @@ Day 6 verifies correctness, security, reliability, observability, and business r
 
 ### Full Regression Suite
 - **Base Full Suite Execution:** **146 passed** in 243.26s (~4 minutes).
-- **Post-Day-6 Additions:** **28 new tests added**, bringing total test suite to **174 tests**.
-- **Final Full Suite Execution:** **174 passed** (verified after all Day 6 additions).
+- **Post-Day-6 Additions:** **28 new tests added**, bringing total test suite to **175 tests**.
+- **Final Full Suite Execution:** **175 passed** (verified after adding the redemption idempotency payload-tampering regression test).
 - **Targeted Security & Observability Suite:** **37 passed** in 5.96s:
   - `tests/security/test_invalid_approvals.py`: 8 passed
   - `tests/security/test_prompt_injection.py`: 5 passed
@@ -155,7 +155,7 @@ python -m pytest -v
 
 ## 11. Day 6 Completion Checklist
 
-- [x] Full regression suite executed on latest revision: **174 passed**.
+- [x] Full regression suite executed on latest revision: **175 passed**.
 - [x] Business-rule, expiry, points, stock, replenishment, and budget coverage verified.
 - [x] Eight-scenario Laya vs baseline comparison recorded with documented limitations.
 - [x] Defects 1 (NaN in objectives) & 2 (NaN in Laya confidence) resolved and covered.
