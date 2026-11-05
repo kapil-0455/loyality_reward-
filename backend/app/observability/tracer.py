@@ -93,21 +93,19 @@ def trace_agent_execution(
                         metadata=metadata,
                         tags=[agent_name, status],
                     )
-                except AttributeError:
-                    if hasattr(client, "start_observation"):
-                        obs = client.start_observation(
-                            name=f"agent:{agent_name}",
-                            input=input_state,
-                            metadata=metadata,
-                        )
+                except (AttributeError, TypeError):
+                    pass
+
+            if hasattr(client, "start_as_current_observation"):
+                try:
+                    with client.start_as_current_observation(
+                        name=f"agent:{agent_name}",
+                        input=input_state,
+                        metadata=metadata,
+                    ) as obs:
                         obs.update(output=output_state)
-            elif hasattr(client, "start_observation"):
-                obs = client.start_observation(
-                    name=f"agent:{agent_name}",
-                    input=input_state,
-                    metadata=metadata,
-                )
-                obs.update(output=output_state)
+                except Exception:
+                    pass
 
             if hasattr(client, "flush"):
                 client.flush()
@@ -154,19 +152,18 @@ def trace_tool_execution(
                         input=arguments,
                         output=result,
                     )
-                except AttributeError:
-                    if hasattr(client, "start_observation"):
-                        obs = client.start_observation(
-                            name=f"tool:{tool_name}",
-                            input=arguments,
-                        )
+                except (AttributeError, TypeError):
+                    pass
+
+            if hasattr(client, "start_as_current_observation"):
+                try:
+                    with client.start_as_current_observation(
+                        name=f"tool:{tool_name}",
+                        input=arguments,
+                    ) as obs:
                         obs.update(output=result)
-            elif hasattr(client, "start_observation"):
-                obs = client.start_observation(
-                    name=f"tool:{tool_name}",
-                    input=arguments,
-                )
-                obs.update(output=result)
+                except Exception:
+                    pass
 
             if hasattr(client, "flush"):
                 client.flush()
