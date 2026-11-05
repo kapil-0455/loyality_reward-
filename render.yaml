@@ -7,6 +7,8 @@ services:
     region: oregon
     healthCheckPath: /health
     autoDeploy: true
+    # Increase timeout for long-running agentic LangGraph workflows (~2-3 min)
+    # Render max is 300s on free tier
     envVars:
       - key: PORT
         value: 8000
@@ -22,3 +24,4 @@ services:
         value: https://cloud.langfuse.com
       - key: ENVIRONMENT
         value: production
+

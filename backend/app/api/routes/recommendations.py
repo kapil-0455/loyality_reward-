@@ -50,7 +50,12 @@ async def create_agentic_recommendations(
 
     This endpoint is separate from the existing deterministic endpoint so
     current API consumers are not affected.
+
+    Note: The LangGraph workflow involves multiple LLM calls and may take
+    60-180 seconds. On free-tier deployments, ensure your HTTP client has
+    a timeout of at least 300 seconds.
     """
+    import asyncio
     from backend.app.agents.graph_builder import build_reward_graph
     from backend.app.agents.graph_runner import run_reward_workflow
     from backend.app.mcp.client import LoyaltyMCPClient
@@ -67,7 +72,25 @@ async def create_agentic_recommendations(
         "purchase_value": float(request.purchase_value),
     }
 
-    execution = await run_reward_workflow(graph, initial_state)
+    # Allow up to 5 minutes for the full multi-agent pipeline
+    try:
+        execution = await asyncio.wait_for(
+            run_reward_workflow(graph, initial_state),
+            timeout=270.0,
+        )
+    except asyncio.TimeoutError:
+        return {
+            "customer_id": request.customer_id,
+            "status": "TIMEOUT",
+            "recommendation_result": None,
+            "final_response": (
+                "The agentic workflow timed out. "
+                "Please retry — the server may have been cold-starting. "
+                "Subsequent requests are significantly faster."
+            ),
+            "trace": [],
+        }
+
     result = execution["result"]
 
     # Return only the public workflow result, not internal customer,
