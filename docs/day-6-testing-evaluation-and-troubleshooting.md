@@ -2,7 +2,7 @@
 
 **Project:** Loyalty and Reward Optimisation with Inventory-Aware Rewards  
 **Sprint phase:** Day 6 of the 7-Day Agentic AI Project Sprint  
-**Branch:** `main`  
+**Branch:** `day6-testing-evaluation`  
 **Status:** All Day 6 testing, security validation, observability, rollback, and regression suites passed.
 
 ## 1. Day 6 Objective
@@ -24,7 +24,8 @@ Day 6 verifies correctness, security, reliability, observability, and business r
 
 ### Full Regression Suite
 - **Base Full Suite Execution:** **146 passed** in 243.26s (~4 minutes).
-- **Post-Day-6 Additions:** **28 new tests added**, bringing total test suite to **174 passing tests**.
+- **Post-Day-6 Additions:** **28 new tests added**, bringing total test suite to **174 tests**.
+- **Final Full Suite Execution:** **174 passed** (verified after all Day 6 additions).
 - **Targeted Security & Observability Suite:** **37 passed** in 5.96s:
   - `tests/security/test_invalid_approvals.py`: 8 passed
   - `tests/security/test_prompt_injection.py`: 5 passed
@@ -154,7 +155,7 @@ python -m pytest -v
 
 ## 11. Day 6 Completion Checklist
 
-- [x] Full regression suite executed on latest revision (146 passed initially, now 174 total).
+- [x] Full regression suite executed on latest revision: **174 passed**.
 - [x] Business-rule, expiry, points, stock, replenishment, and budget coverage verified.
 - [x] Eight-scenario Laya vs baseline comparison recorded with documented limitations.
 - [x] Defects 1 (NaN in objectives) & 2 (NaN in Laya confidence) resolved and covered.
