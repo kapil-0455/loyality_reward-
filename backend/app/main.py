@@ -11,10 +11,14 @@ from backend.app.observability.logging import RequestIDLoggingMiddleware
 
 load_dotenv()
 
+import os
+
 app = FastAPI(
     title="Loyalty Reward Optimisation API",
     description="Inventory-aware reward recommendation system",
     version="1.0.0",
+    # Show full error details unless explicitly in production mode
+    debug=os.getenv("ENVIRONMENT", "development") != "production",
 )
 
 # CORS middleware for cross-origin frontend support
