@@ -1104,7 +1104,7 @@ elif main_portal == "⚙️ Admin Dashboard":
             else:
                 st.info("🟡 In-memory trace mode active. Connect Langfuse credentials in `.env` for cloud streaming.")
         with t_btn_col2:
-            run_trace_btn = st.button("🚀 Trigger Live Agent Trace", type="primary", use_container_width=True)
+            run_trace_btn = st.button("🚀 Trigger Full 6-Agent Trace", type="primary", use_container_width=True)
 
         if run_trace_btn:
             # 1. Router Agent Trace
@@ -1119,102 +1119,154 @@ elif main_portal == "⚙️ Admin Dashboard":
             d_trace = trace_agent_execution(
                 agent_name="data_agent",
                 input_state={"customer_id": 12349, "mcp_tool": "read_customer_loyalty_profile"},
-                output_state={"loyalty_tier": "Gold", "points_balance": 3444, "cluster": 1, "database": "Neon PostgreSQL"},
+                output_state={"loyalty_tier": "Gold", "points_balance": 3444, "database": "Neon PostgreSQL"},
                 duration_ms=42.1,
                 metadata={"portal": "Streamlit Admin", "step": 2, "mcp_protocol": "active"},
             )
-            # 3. Eligibility Agent Trace
+            # 3. Analytics Agent Trace
+            an_trace = trace_agent_execution(
+                agent_name="analytics_agent",
+                input_state={"customer_id": 12349, "orders_analyzed": 15, "feature_source": "customer_rfm_segments"},
+                output_state={"recency_days": 19, "frequency_orders": 4, "monetary_ltv": 4428.69, "cluster": 1, "segment": "High-Value Champion"},
+                duration_ms=31.5,
+                metadata={"portal": "Streamlit Admin", "step": 3, "ml_model": "kmeans_clustering"},
+            )
+            # 4. Eligibility Agent Trace
             e_trace = trace_agent_execution(
                 agent_name="eligibility_agent",
                 input_state={"points": 3444, "tier": "Gold", "catalogue_total": 20, "budget_check": "CAMP-001 ($50,000 limit)"},
                 output_state={"feasible_candidates": 4, "pruned_rewards": 16, "status": "HARD_CONSTRAINTS_PASSED"},
                 duration_ms=18.6,
-                metadata={"portal": "Streamlit Admin", "step": 3, "rules_enforced": ["points", "tier", "stock", "budget"]},
+                metadata={"portal": "Streamlit Admin", "step": 4, "rules_enforced": ["points", "tier", "stock", "budget"]},
             )
-            # 4. Reward Agent Trace
+            # 5. Reward Agent Trace
             rw_trace = trace_agent_execution(
                 agent_name="reward_agent",
                 input_state={"feasible_candidates": 4, "objective": "Balance Relevance (0.35) + Margin (0.25) - Depletion (0.15)"},
                 output_state={"selected_reward_id": "SYN-REWARD-001", "name": "Everyday Essentials", "optimization_score": 8.75, "laya_confidence": 0.45, "decision_mode": "BASELINE_FALLBACK_SAFE"},
                 duration_ms=35.0,
-                metadata={"portal": "Streamlit Admin", "step": 4, "confidence_gate": "0.60_threshold"},
+                metadata={"portal": "Streamlit Admin", "step": 5, "confidence_gate": "0.60_threshold"},
+            )
+            # 6. Response Agent Trace
+            res_trace = trace_agent_execution(
+                agent_name="response_agent",
+                input_state={"selected_reward_id": "SYN-REWARD-001", "customer_name": "Valued Member", "tier": "Gold"},
+                output_state={"formatted_response": "Congratulations! As a Gold member, you qualify for Everyday Essentials (1,718 pts).", "reason_codes": ["CUSTOMER_ELIGIBLE", "STOCK_AVAILABLE", "BUDGET_VERIFIED"], "format": "JSON_SCHEMA_VALID"},
+                duration_ms=22.2,
+                metadata={"portal": "Streamlit Admin", "step": 6, "guardrail": "safe_natural_language"},
             )
 
-            st.session_state["live_langfuse_traces"] = [r_trace, d_trace, e_trace, rw_trace]
-            st.success("🎉 Multi-Agent Trace Emitted! 4 steps recorded & sent to Langfuse Cloud.")
+            st.session_state["live_langfuse_traces"] = [r_trace, d_trace, an_trace, e_trace, rw_trace, res_trace]
+            st.success("🎉 Complete 6-Agent Workflow Trace Emitted! All 6 nodes recorded and synced to Langfuse Cloud.")
             st.balloons()
 
         st.markdown("---")
 
-        # Visual Agent Execution Flow (4 Nodes)
-        st.markdown("#### 🔄 Agentic Execution Flow (Live Trace Visualization)")
-        flow_cols = st.columns(4)
-        with flow_cols[0]:
+        # Visual Agent Execution Flow (All 6 Nodes in 2 Rows of 3)
+        st.markdown("#### 🔄 LangGraph 6-Agent Execution Flow (Live Trace Visualization)")
+        
+        row1_cols = st.columns(3)
+        with row1_cols[0]:
             st.markdown(
                 """
                 <div class="ui-card" style="border-left: 4px solid #38BDF8 !important;">
                     <div style="font-size: 0.8rem; color: #38BDF8; font-weight: bold;">STEP 1: ROUTING</div>
-                    <div style="font-size: 1.1rem; font-weight: bold; margin: 0.2rem 0;">🛡️ Router Agent</div>
+                    <div style="font-size: 1.05rem; font-weight: bold; margin: 0.2rem 0;">🛡️ 1. Router Agent</div>
                     <p style="font-size: 0.85rem; margin: 0;">Intent classification & security prompt guardrails.</p>
                     <div style="margin-top: 0.5rem;"><span class="badge-redeemed">28.4 ms</span> &nbsp;<span class="badge-credited">AUTH OK</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-        with flow_cols[1]:
+        with row1_cols[1]:
             st.markdown(
                 """
                 <div class="ui-card" style="border-left: 4px solid #10B981 !important;">
                     <div style="font-size: 0.8rem; color: #10B981; font-weight: bold;">STEP 2: DATA FETCH</div>
-                    <div style="font-size: 1.1rem; font-weight: bold; margin: 0.2rem 0;">🗄️ Data Agent</div>
+                    <div style="font-size: 1.05rem; font-weight: bold; margin: 0.2rem 0;">🗄️ 2. Data Agent</div>
                     <p style="font-size: 0.85rem; margin: 0;">Neon PostgreSQL & MCP customer context queries.</p>
                     <div style="margin-top: 0.5rem;"><span class="badge-redeemed">42.1 ms</span> &nbsp;<span class="badge-credited">NEON DB</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-        with flow_cols[2]:
+        with row1_cols[2]:
+            st.markdown(
+                """
+                <div class="ui-card" style="border-left: 4px solid #06B6D4 !important;">
+                    <div style="font-size: 0.8rem; color: #06B6D4; font-weight: bold;">STEP 3: ANALYTICS</div>
+                    <div style="font-size: 1.05rem; font-weight: bold; margin: 0.2rem 0;">📈 3. Analytics Agent</div>
+                    <p style="font-size: 0.85rem; margin: 0;">RFM computation & K-Means cluster assignment.</p>
+                    <div style="margin-top: 0.5rem;"><span class="badge-redeemed">31.5 ms</span> &nbsp;<span class="badge-credited">CLUSTER 1</span></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        row2_cols = st.columns(3)
+        with row2_cols[0]:
             st.markdown(
                 """
                 <div class="ui-card" style="border-left: 4px solid #F59E0B !important;">
-                    <div style="font-size: 0.8rem; color: #F59E0B; font-weight: bold;">STEP 3: GUARDRAILS</div>
-                    <div style="font-size: 1.1rem; font-weight: bold; margin: 0.2rem 0;">⚖️ Eligibility Agent</div>
+                    <div style="font-size: 0.8rem; color: #F59E0B; font-weight: bold;">STEP 4: GUARDRAILS</div>
+                    <div style="font-size: 1.05rem; font-weight: bold; margin: 0.2rem 0;">⚖️ 4. Eligibility Agent</div>
                     <p style="font-size: 0.85rem; margin: 0;">Deterministic policy engine: points, tier, stock barriers.</p>
                     <div style="margin-top: 0.5rem;"><span class="badge-redeemed">18.6 ms</span> &nbsp;<span class="badge-credited">16 PRUNED</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-        with flow_cols[3]:
+        with row2_cols[1]:
             st.markdown(
                 """
                 <div class="ui-card" style="border-left: 4px solid #A855F7 !important;">
-                    <div style="font-size: 0.8rem; color: #A855F7; font-weight: bold;">STEP 4: DECISION</div>
-                    <div style="font-size: 1.1rem; font-weight: bold; margin: 0.2rem 0;">🎯 Reward Agent</div>
+                    <div style="font-size: 0.8rem; color: #A855F7; font-weight: bold;">STEP 5: OPTIMIZATION</div>
+                    <div style="font-size: 1.05rem; font-weight: bold; margin: 0.2rem 0;">🎯 5. Reward Agent</div>
                     <p style="font-size: 0.85rem; margin: 0;">Multi-objective optimization & Laya confidence evaluation.</p>
                     <div style="margin-top: 0.5rem;"><span class="badge-redeemed">35.0 ms</span> &nbsp;<span class="badge-credited">SCORE: 8.75</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
+        with row2_cols[2]:
+            st.markdown(
+                """
+                <div class="ui-card" style="border-left: 4px solid #EC4899 !important;">
+                    <div style="font-size: 0.8rem; color: #EC4899; font-weight: bold;">STEP 6: RESPONSE</div>
+                    <div style="font-size: 1.05rem; font-weight: bold; margin: 0.2rem 0;">💬 6. Response Agent</div>
+                    <p style="font-size: 0.85rem; margin: 0;">Safe natural language explanation & JSON serialization.</p>
+                    <div style="margin-top: 0.5rem;"><span class="badge-redeemed">22.2 ms</span> &nbsp;<span class="badge-credited">JSON READY</span></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-        # Latency Breakdown Chart
-        st.markdown("#### ⚡ Latency Breakdown by Agent Node")
+        # Latency Breakdown Chart for All 6 Agents
+        st.markdown("#### ⚡ Latency Breakdown Across All 6 Agents (Total: 177.8 ms)")
         latency_df = pd.DataFrame({
-            "Agent Node": ["1. Router Agent", "2. Data Agent (DB)", "3. Eligibility Agent", "4. Reward Agent (ML)"],
-            "Execution Time (ms)": [28.4, 42.1, 18.6, 35.0],
+            "Agent Node": [
+                "1. Router Agent",
+                "2. Data Agent (DB)",
+                "3. Analytics Agent (RFM)",
+                "4. Eligibility Agent",
+                "5. Reward Agent (ML)",
+                "6. Response Agent (JSON)",
+            ],
+            "Execution Time (ms)": [28.4, 42.1, 31.5, 18.6, 35.0, 22.2],
         }).set_index("Agent Node")
         st.bar_chart(latency_df, color="#38BDF8")
 
         st.markdown("---")
 
-        # Step-by-Step Deep State Inspector Tabs
-        st.markdown("#### 🔍 Step-by-Step State & Payload Inspector")
-        tab_r, tab_d, tab_e, tab_rw = st.tabs([
-            "Step 1: Router Agent",
-            "Step 2: Data Agent",
-            "Step 3: Eligibility Agent",
-            "Step 4: Reward Agent",
+        # Step-by-Step Deep State Inspector Tabs for All 6 Agents
+        st.markdown("#### 🔍 Complete 6-Agent State & Payload Inspector")
+        tab_r, tab_d, tab_an, tab_e, tab_rw, tab_res = st.tabs([
+            "1. Router Agent",
+            "2. Data Agent",
+            "3. Analytics Agent",
+            "4. Eligibility Agent",
+            "5. Reward Agent",
+            "6. Response Agent",
         ])
 
         with tab_r:
@@ -1237,6 +1289,16 @@ elif main_portal == "⚙️ Admin Dashboard":
                 st.caption("Retrieved Database Context:")
                 st.json({"loyalty_tier": "Gold", "points_balance": 3444, "cluster": 1, "source": "Neon Cloud PostgreSQL", "latency_ms": 42.1})
 
+        with tab_an:
+            st.write("**Node Role:** Behavioral RFM Computation & K-Means Segment Mapping")
+            c1, c2 = st.columns(2)
+            with c1:
+                st.caption("Input State:")
+                st.json({"customer_id": 12349, "orders_count": 15, "source_table": "customer_rfm_segments"})
+            with c2:
+                st.caption("Computed RFM Analytics:")
+                st.json({"recency_days": 19, "frequency_orders": 4, "monetary_ltv": 4428.69, "cluster": 1, "segment_name": "High-Value Champion", "latency_ms": 31.5})
+
         with tab_e:
             st.write("**Node Role:** Deterministic Business Rule Validation (Zero Hallucination Barrier)")
             c1, c2 = st.columns(2)
@@ -1245,7 +1307,7 @@ elif main_portal == "⚙️ Admin Dashboard":
                 st.json({"customer_points": 3444, "eligible_tier": "Gold", "catalogue_rewards_checked": 20, "campaign_budget": "CAMP-001"})
             with c2:
                 st.caption("Pruning Results:")
-                st.json({"feasible_candidates": 4, "pruned_rewards": 16, "reasons": ["INSUFFICIENT_POINTS (11)", "TIER_MISMATCH (3)", "OUT_OF_STOCK (2)"], "status": "HARD_CONSTRAINTS_PASSED"})
+                st.json({"feasible_candidates": 4, "pruned_rewards": 16, "reasons": ["INSUFFICIENT_POINTS (11)", "TIER_MISMATCH (3)", "OUT_OF_STOCK (2)"], "status": "HARD_CONSTRAINTS_PASSED", "latency_ms": 18.6})
 
         with tab_rw:
             st.write("**Node Role:** Multi-Objective Utility Ranking & Laya Confidence Gating")
@@ -1254,8 +1316,18 @@ elif main_portal == "⚙️ Admin Dashboard":
                 st.caption("Scoring Objective Weights:")
                 st.json({"w_relevance": 0.35, "w_margin": 0.25, "w_inventory": 0.25, "w_cost_penalty": 0.15, "laya_confidence_threshold": 0.60})
             with c2:
-                st.caption("Final Decision:")
+                st.caption("Final Optimization Decision:")
                 st.json({"selected_reward_id": "SYN-REWARD-001", "name": "Everyday Essentials", "optimization_score": 8.75, "laya_confidence": 0.45, "decision_mode": "BASELINE_FALLBACK_SAFE", "latency_ms": 35.0})
+
+        with tab_res:
+            st.write("**Node Role:** Safe Natural Language Explanation & Structured Response Serialization")
+            c1, c2 = st.columns(2)
+            with c1:
+                st.caption("Input State:")
+                st.json({"selected_reward": "SYN-REWARD-001", "name": "Everyday Essentials", "customer_tier": "Gold", "points_cost": 1718})
+            with c2:
+                st.caption("Formatted Response Payload:")
+                st.json({"user_message": "Congratulations! As a Gold member, you qualify for Everyday Essentials (1,718 pts).", "status": "READY_FOR_APPROVAL", "reason_codes": ["CUSTOMER_ELIGIBLE", "STOCK_AVAILABLE", "BUDGET_VERIFIED"], "latency_ms": 22.2})
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
