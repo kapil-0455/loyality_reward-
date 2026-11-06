@@ -49,3 +49,17 @@ def root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+
+@app.get("/diagnostic")
+def diagnostic():
+    """Diagnostic check to inspect environment variables securely."""
+    import os
+    return {
+        "status": "ok",
+        "has_database_url": bool(os.getenv("DATABASE_URL")),
+        "has_groq_api_key": bool(os.getenv("GROQ_API_KEY")),
+        "has_langfuse_public": bool(os.getenv("LANGFUSE_PUBLIC_KEY")),
+        "has_langfuse_secret": bool(os.getenv("LANGFUSE_SECRET_KEY")),
+        "environment": os.getenv("ENVIRONMENT"),
+    }
