@@ -230,6 +230,7 @@ with st.sidebar:
                 "🏠 Home",
                 "🎁 My Rewards",
                 "⚡ Redeem Reward",
+                "🤖 AI Loyalty Concierge",
                 "📊 Points & History",
                 "👤 Profile",
             ],
@@ -642,6 +643,126 @@ if main_portal == "👤 Customer Dashboard":
                                     db.close()
             else:
                 st.warning("No feasible rewards could satisfy your points or inventory constraints.")
+
+    # 1.4 AI LOYALTY CONCIERGE (6-Agent LangGraph + Groq LLM)
+    elif nav_item == "🤖 AI Loyalty Concierge":
+        st.markdown('<div class="main-header">🤖 AI Loyalty Concierge (6-Agent LangGraph)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Live multi-agent decision orchestration powered by LangGraph, MCP Protocol, and Groq LLM.</div>', unsafe_allow_html=True)
+
+        st.markdown(
+            f"""
+            <div style="background: linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%); border: 1px solid #6366F1; border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4 style="color: #A5B4FC; margin: 0;">Active Customer Context: #{current_customer.customer_id}</h4>
+                        <p style="color: #94A3B8; margin: 0.25rem 0 0 0;">Tier: <strong style="color: #F59E0B;">{current_customer.loyalty_tier}</strong> &nbsp;|&nbsp; Balance: <strong>{current_customer.points_balance:,} pts</strong></p>
+                    </div>
+                    <span style="background: #4338CA; color: #E0E7FF; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 600; font-size: 0.8rem;">LangGraph 6-Node Active</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        c1, c2, c3 = st.columns([2, 2, 2])
+        with c1:
+            ai_cart_val = st.number_input("Proposed Cart / Purchase ($):", min_value=0.0, value=150.0, step=25.0)
+        with c2:
+            ai_date = st.date_input("Evaluation Date:", value=date(2026, 11, 5), key="ai_eval_date")
+        with c3:
+            st.markdown("<br>", unsafe_allow_html=True)
+            consult_btn = st.button("🚀 Consult AI Concierge", type="primary", use_container_width=True)
+
+        if consult_btn or "ai_concierge_result" in st.session_state:
+            if consult_btn:
+                import asyncio
+                from backend.app.agents.graph_builder import build_reward_graph
+                from backend.app.agents.graph_runner import run_reward_workflow
+                from backend.app.mcp.client import LoyaltyMCPClient
+
+                with st.spinner("🤖 Coordinating 6-Agent LangGraph Pipeline (Router ➔ Data ➔ Analytics ➔ Eligibility ➔ Reward ➔ Groq LLM)..."):
+                    try:
+                        graph = build_reward_graph(mcp_client=LoyaltyMCPClient())
+                        initial_state = {
+                            "request": "recommend a reward",
+                            "user_role": "customer",
+                            "customer_id": int(current_customer.customer_id),
+                            "evaluation_date": ai_date.isoformat(),
+                            "purchase_value": float(ai_cart_val),
+                        }
+                        execution = asyncio.run(run_reward_workflow(graph, initial_state))
+                        st.session_state["ai_concierge_result"] = execution
+                    except Exception as err:
+                        st.error(f"Agent execution encountered an error: {err}")
+
+            execution = st.session_state.get("ai_concierge_result")
+            if execution:
+                res_payload = execution.get("result", {})
+                trace_list = execution.get("trace", [])
+
+                # 1. LLM Personalised Response Card
+                st.markdown("### 💬 Groq LLM Concierge Response")
+                final_answer = res_payload.get("final_response")
+                if final_answer:
+                    st.markdown(
+                        f"""
+                        <div style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border-left: 4px solid #10B981; border-radius: 0.5rem; padding: 1.25rem; font-size: 1.05rem; line-height: 1.6; color: #F8FAFC; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                            {final_answer.replace(chr(10), '<br>')}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.warning("No conversational response generated.")
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                # 2. 6-Agent Workflow Stepper Visualisation
+                st.markdown("### 🛰️ Live 6-Agent Execution Stepper")
+                node_names = ["router", "data", "analytics", "eligibility", "reward", "response"]
+                node_labels = {
+                    "router": "1. Router",
+                    "data": "2. Data (MCP)",
+                    "analytics": "3. Analytics (RFM)",
+                    "eligibility": "4. Eligibility",
+                    "reward": "5. Reward Rank",
+                    "response": "6. Groq LLM",
+                }
+
+                step_cols = st.columns(6)
+                trace_map = {t["node"]: t for t in trace_list}
+
+                for idx, node in enumerate(node_names):
+                    with step_cols[idx]:
+                        t_item = trace_map.get(node)
+                        if t_item:
+                            st_val = t_item.get("status", "SUCCESS")
+                            bg = "#064E3B" if "SUCCESS" in st_val else "#78350F"
+                            bd = "#10B981" if "SUCCESS" in st_val else "#F59E0B"
+                            ico = "✅" if "SUCCESS" in st_val else "⚠️"
+                            st.markdown(
+                                f"""
+                                <div style="background: {bg}; border: 1px solid {bd}; border-radius: 0.5rem; padding: 0.6rem 0.3rem; text-align: center;">
+                                    <div style="font-size: 0.75rem; font-weight: 700; color: #F8FAFC;">{node_labels[node]}</div>
+                                    <div style="font-size: 0.7rem; color: #D1D5DB; margin-top: 0.2rem;">{ico} {st_val}</div>
+                                </div>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+                        else:
+                            st.markdown(
+                                f"""
+                                <div style="background: #1E293B; border: 1px dashed #475569; border-radius: 0.5rem; padding: 0.6rem 0.3rem; text-align: center;">
+                                    <div style="font-size: 0.75rem; color: #94A3B8;">{node_labels[node]}</div>
+                                    <div style="font-size: 0.7rem; color: #64748B;">Pending</div>
+                                </div>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+
+                # 3. Expandable Trace Details
+                with st.expander("🔍 Inspect Full Agent Trace & State Data"):
+                    st.json(execution)
 
     # 1.4 POINTS & HISTORY
     elif nav_item == "📊 Points & History":
