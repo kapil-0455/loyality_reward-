@@ -29,6 +29,9 @@ langchain-groq>=0.2.0
 langgraph>=0.2.50
 langfuse>=2.54.0
 
+# Decision Engine & System-1 Routing
+laya>=0.4.22
+
 # HTTP & MCP Protocol
 httpx>=0.28.0
 requests>=2.32.3
