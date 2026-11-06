@@ -1,6 +1,9 @@
 import math
 
-from laya import Router
+try:
+    from laya import Router
+except ImportError:
+    Router = None
 
 from backend.app.decision.baseline_ranker import rank_rewards
 from backend.app.decision.models import RankedReward
@@ -17,8 +20,8 @@ def select_reward_with_laya(
     """
     Select one feasible reward using Laya.
 
-    Falls back to baseline ranking if Laya fails
-    or returns an invalid/low-confidence decision.
+    Falls back to baseline ranking if Laya fails,
+    is not installed, or returns an invalid/low-confidence decision.
     """
 
     if not feasible_candidates:
@@ -34,6 +37,9 @@ def select_reward_with_laya(
 
     if not candidates:
         return []
+
+    if Router is None and router is None:
+        return rank_rewards(customer_context, candidates)
 
     try:
         if router is None:
