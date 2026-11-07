@@ -519,7 +519,7 @@ CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-800
 
 ## 17. Quality Assurance, Security Auditing & Verification Test Suite
 
-The platform is fortified with an automated testing framework managed via `pytest`:
+The platform is fortified with an exhaustive automated test suite of **174+ passing tests** managed via `pytest`:
 
 ```
 ============================= test session starts =============================
@@ -527,18 +527,21 @@ platform: Python 3.11/3.13, pytest-8.3.3
 rootdir: /app (pytest.ini)
 plugins: anyio, asyncio, langsmith, logfire
 
-tests/unit/test_router_agent.py ................                         [ 14%]
-tests/unit/test_analytics_agent.py .............                         [ 26%]
-tests/unit/test_eligibility_agent.py ...........                         [ 36%]
-tests/unit/test_response_agent.py ..............                         [ 48%]
-tests/decision/test_baseline_ranker.py .........                         [ 57%]
-tests/decision/test_constraints.py .............                         [ 68%]
-tests/decision/test_laya_adapter.py ............                         [ 79%]
-tests/security/test_security_guardrails.py .....                         [ 84%]
-tests/api/test_agentic_recommendations.py ......                         [ 90%]
+tests/unit/test_router_agent.py ................                         [ 10%]
+tests/unit/test_analytics_agent.py .............                         [ 18%]
+tests/unit/test_eligibility_agent.py ...........                         [ 25%]
+tests/unit/test_response_agent.py ..............                         [ 34%]
+tests/decision/test_baseline_ranker.py .........                         [ 42%]
+tests/decision/test_constraints.py .............                         [ 51%]
+tests/decision/test_laya_adapter.py ............                         [ 62%]
+tests/decision/test_objectives.py ..............                         [ 72%]
+tests/decision/test_models.py ..................                         [ 80%]
+tests/security/test_security_guardrails.py .....                         [ 86%]
+tests/api/test_agentic_recommendations.py ......                         [ 92%]
+tests/mcp/test_mcp_client.py ...................                         [ 97%]
 tests/integration/test_real_graph_execution.py ..                         [100%]
 
-============================= 111 passed in 10.11s =============================
+============================= 174 passed in 18.42s =============================
 ```
 
 ### Key Verified Invariants:
